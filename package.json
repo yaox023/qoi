@@ -1,0 +1,24 @@
+{
+  "name": "qoi",
+  "version": "1.0.0",
+  "description": "a qoi image encoder and decoder",
+  "main": "./src/lib.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "test:watch": "jest --watch"
+  },
+  "keywords": [
+    "qoi"
+  ],
+  "author": "yaox023@yahoo.com",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/jest": "^29.2.5",
+    "@types/node": "^18.11.18",
+    "jest": "^29.3.1",
+    "ts-jest": "^29.0.3",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.8.4"
+  }
+}

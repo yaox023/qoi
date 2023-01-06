@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QOI image examples</title>
+  </head>
+  <body>
+    <script src="./example/tailwindcss.js"></script>
+    <style></style>
+
+    <div class="container mx-auto flex justify-center py-3">
+      <table class="table-auto w-4/5 max-w-md border-separate border-spacing-3">
+        <thead>
+          <tr>
+            <th>PNG</th>
+            <th>QOI</th>
+          </tr>
+        </thead>
+        <tbody id="image-list"></tbody>
+      </table>
+    </div>
+
+    <script type="module">
+      import { decode } from "./build/lib.js";
+
+      const imageList = document.getElementById("image-list");
+
+      function renderImage(name) {
+        const tr = document.createElement("tr");
+        // tr.class = "my-6"
+        const png = `qoi_test_images/${name}.png`;
+        const qoi = `qoi_test_images/${name}.qoi`;
+        const qoiId = `${name}-id`;
+
+        tr.innerHTML = `
+          <td class="text-center">
+            <img
+              class="inline w-32"
+              src="${png}"
+            />
+          </td>
+          <td class="text-center">
+            <canvas id="${qoiId}" class="inline w-32"></canvas>
+          </td>
+        `;
+        const canvas = tr.querySelector(`#${qoiId}`);
+        renderQOI(qoi, canvas);
+        imageList.appendChild(tr);
+      }
+
+      async function renderQOI(path, canvas) {
+        const res = await fetch(path);
+        const buffer = new Uint8Array(await res.arrayBuffer());
+        const qoi = decode(buffer);
+        console.log(qoi);
+        canvas.width = qoi.width;
+        canvas.height = qoi.height;
+
+        const ctx = canvas.getContext("2d");
+        const imageData = createImageData(qoi);
+        ctx.putImageData(imageData, 0, 0);
+      }
+
+      function createImageData(qoi) {
+        if (qoi.channels === 4) {
+          return new ImageData(
+            new Uint8ClampedArray(qoi.pixels),
+            qoi.width,
+            qoi.height
+          );
+        }
+
+        // channel 3
+        const data = new Uint8ClampedArray(qoi.width * qoi.height * 4);
+        let index = 0;
+        const writePixel = (r, g, b) => {
+          data[index++] = r;
+          data[index++] = g;
+          data[index++] = b;
+          data[index++] = 255;
+        };
+
+        for (let i = 0; i < qoi.pixels.length; i += 3) {
+          writePixel(qoi.pixels[i], qoi.pixels[i + 1], qoi.pixels[i + 2]);
+        }
+        return new ImageData(data, qoi.width, qoi.height);
+      }
+
+      renderImage("dice");
+      renderImage("kodim10");
+      renderImage("kodim23");
+      renderImage("qoi_logo");
+      renderImage("testcard_rgba");
+      renderImage("testcard");
+      renderImage("wikipedia_008");
+    </script>
+  </body>
+</html>
